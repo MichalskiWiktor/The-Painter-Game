@@ -1,0 +1,73 @@
+body
+{
+	background-color: #000000;
+	color: lightgray;
+	font-size: 28px;
+	font-family: 'Inconsolata';
+	font-weight: 700;
+	margin:0;
+}
+header
+{
+	width:100%;
+	text-align:center;
+}
+.square
+{
+	width:15px;
+	height:15px;
+	float:left;
+	border:2px solid black;
+	background-color:purple;
+}
+
+#board
+{
+	width:20%;
+	margin-left:auto;
+	margin-right:auto;
+	text-align:justify
+}
+#headline
+{
+	width:76%;
+	text-align:center;
+	float:left;
+	margin-right:7%;
+
+}
+#score
+{
+	width:5%;
+	text-align:left;
+	color:#eb5b34;
+	float:left;
+	margin-top:1%;
+	font-size:50px;
+}
+#pause
+{
+	width:5%;
+	float: left;
+	margin-left:2%;
+}
+#restart
+{
+	width:5%;
+	float: left;
+}
+#pause, #restart, #start:hover
+{
+	cursor:pointer;
+}
+#start
+{
+	width:100%;
+	height:50px;
+	margin-top:20px;
+	border-radius:20px;
+	font-size:40px;
+}
+.eb5b34{
+	color:#eb5b34;
+}
