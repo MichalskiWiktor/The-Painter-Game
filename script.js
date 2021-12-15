@@ -8,68 +8,51 @@ let Map = {
 	trapsX: [],
 	trapsY: [],
 	numberOfTraps: 10,
+	picture: false,
 	generateMap(){
 		let board="";
-		for(let i=0;i<size.y;i++)
+		for(let i=0;i<Map.size.y;i++)
 		{
-			for(let j=0;j<size.x;j++)
+			for(let j=0;j<Map.size.x;j++)
 			{
 				board = board +`<div id="squer${i}.${j}" class="square"></div>`;
 			}
 			board = board + '<div style="clear:both"></div>';
 		}
 		document.getElementById("board").innerHTML=board;
-		for(let i=0;i<painted;i++)document.getElementById(`squer${painted_y[i]}.${painted_x[i]}`).style.background="gray";
-		for(let i=0;i<10;i++)document.getElementById(`squer${trap_y[i]}.${trap_x[i]}`).style.background="orange";
-		document.getElementById(`squer${position.y}.${position.x}`).style.background="red";
-		if(painted==0)createTraps();
+		for(let i=0;i<Player.score;i++)document.getElementById(`squer${Map.paintedFieldsY[i]}.${Map.paintedFieldsX[i]}`).style.background="gray";
+		for(let i=0;i<Map.numberOfTraps;i++)document.getElementById(`squer${Map.trapsY[i]}.${Map.trapsX[i]}`).style.background="orange";
+		document.getElementById(`squer${Player.position.y}.${Player.position.x}`).style.background="red";
+		if(Player.score==0)Map.generateTraps();
 	},
 	/////Random number///
     randomInt(min, max) {
 	  return min + Math.floor((max - min) * Math.random());
   	},
-  ///////funkcja tworzaca płapki////////////////////////////
 	generateTraps(){
-	  for(let i=0;i<numberOfTraps;i++){
-		  this.trapsX[i] = randomInt(0, 20);
-		  this.trapsY[i] = randomInt(0, 40);
+	  for(let i=0;i<Map.numberOfTraps;i++){
+		  this.trapsX[i] = this.randomInt(0, 20);
+		  this.trapsY[i] = this.randomInt(0, 40);
 	  }
   	},
-	check(axis, symbol, choose){
-		if(axis=="x" && symbol=="+")
-		{
-			if((position.x + 1) >=20)
-			{
-				choose==false;
-				position.x=-1;
-			}
+	isOutOfBoundries(axis, symbol){
+		if(axis=="x" && symbol=="+" && (Player.position.x + 1) >=20){
+			Player.position.x=-1;
+			return false;
 		}
-		else if(axis=="x" && symbol=="-")
-		{
-			if((position.x - 1) <0)
-			{
-				choose==false;
-				position.x=20;
-			}
+		else if(axis=="x" && symbol=="-" && (Player.position.x - 1) <0){
+			Player.position.x=20;
+			return false;
 		}
-		else if(axis=="y" && symbol=="+")
-		{
-			if((position.y + 1) >=40)
-			{
-				choose==false;
-				position.y=-1;
-			}
+		else if(axis=="y" && symbol=="+" && (Player.position.y + 1) >=40){
+			Player.position.y=-1;
+			return false;
 		}
-		else if(axis=="y" && symbol=="-")
-		{
-			if((position.y - 1) <0)
-			{
-				choose==false;
-				position.y=40;
-			}
+		else if(axis=="y" && symbol=="-" && (Player.position.y - 1) <0){
+			Player.position.y=40;
+			return false;
 		}
-		return choose;
-	
+		return true;
 	},
 }
 let Player = {
@@ -79,77 +62,79 @@ let Player = {
 		y: 20
 	},
 	direction: "up",
+	isFirstMove: false,
 	move() {
-		document.addEventListener("keypress", onKeyPress);
-		painted_x[painted] = position.x;
-		painted_y[painted]= position.y;
-		painted++;
-		let choose = true;
-		if(direction=="up"){
-			choose = check("y", "-", choose);
-			if(choose==true)position.y--;
+		if(this.isFirstMove==false)Map.generateTraps();
+		this.isFirstMove=true;
+		document.addEventListener("keypress", this.onKeyPress);
+		Map.paintedFieldsX[this.score] = this.position.x;
+		Map.paintedFieldsY[this.score] = this.position.y;
+		this.score++;
+		switch(this.direction){
+			case 'up':
+				if(Map.isOutOfBoundries("y", "-"))this.position.y--;
+				break;
+			case 'down':
+				if(Map.isOutOfBoundries("y", "+"))this.position.y++;
+				break;
+			case 'right':
+				if(Map.isOutOfBoundries("x", "+"))this.position.x++;
+				break;
+			case 'left':
+				if(Map.isOutOfBoundries("x", "-"))this.position.x--;
+				break;
 		}
-		else if(direction=="down"){
-			choose = check("y", "+", choose);
-			if(choose==true)position.y++;
-		}
-		else if(direction=="right"){
-			choose = check("x", "+", choose);
-			if(choose==true)position.x++;
-		}
-		else if(direction=="left"){
-			choose = check("x", "-", choose);
-			if(choose==true)position.x--;
-		}
-		for(let i=0;i<10;i++)
-		{
-			if(trap_x[i]==position.x && trap_y[i]==position.y)/////////////////checkenie czy uzytkownik dostal punkt
-			{
-				damage.play();
-				end_game();
+		for(let i=0;i<Map.numberOfTraps;i++){
+			if(Map.trapsX[i]==this.position.x && Map.trapsY[i]==this.position.y){
+				Game.damageSound.play();
+				Game.endGame();
 			}
 		}
-		if(document.getElementById(`squer${position.y}.${position.x}`).style.background=="gray" && restart==false)
-			{
-				damage.play();
-				end_game();
-			}
-		map();
-		restart=false;
-		document.getElementById(`score`).innerHTML=painted;
-		if(!end)setTimeout("move()",300);
+		/*if(document.getElementById(`squer${this.position.y}.${this.position.x}`).style.background=="gray" && Game.isRestart==false){
+			Game.damageSound.play();
+			Game.endGame();
+		}*/
+		Map.generateMap();
+		Game.isRestart = false;
+		document.getElementById(`score`).innerHTML=Player.score;
+		if(!Game.isEnd)setTimeout("Player.move()",300);
 	},
 	/////Pressed Key///
 	onKeyPress(ev){ 
 		var keyCode = ev.keyCode;
-		setContainerContents(keyCode);
+		Player.setContainerContents(keyCode);
 	},
 	setContainerContents(key){
 		switch(key)
 		{
 			case 119:
-				direction="up";
+				Player.direction="up";
 				break;
 			case 115:
-				direction="down";
+				Player.direction="down";
 				break;
 			case 100:
-				direction="right";
+				Player.direction="right";
 				break;
 			case 97:
-				direction="left";
+				Player.direction="left";
 				break;
-			case 32:
+			/*case 32:
 				button2();
-				break;
+				break;*/
 		}
-		map();
+		Map.generateMap();
 	},
 }
 let Game = {
+	isRestart: false,
 	isEnd: false,
 	damageSound: new Audio("sounds/no.wav"),
 	gameStatus: true,////////Play or Pouse
+	endGame(){
+		this.isEnd = true;
+		document.getElementById(`naglowek`).innerHTML = "End Game";
+	}
 }
 /*Event Listeners*/
 var start = document.querySelector("#start");
@@ -157,34 +142,33 @@ start.addEventListener("click", function() {
 	Player.move();
 }, false);
 
-var gameStatus = document.querySelector("#pause");
+/*var gameStatus = document.querySelector("#pause");
 gameStatus.addEventListener("click", function () {
-	if(picture==false){
+	if(Map.picture==false){
 		Game.setEnd(true);
 		document.getElementById("pause").src="img/play.png";
-		picture=true;
+		Map.picture=true;
 	}
 	else {
 		Game.setEnd(false);
 		document.getElementById("pause").src="img/pause.png";
-		picture=false;
-		move();
+		Map.picture=false;
+		Player.move();
 	}
 }, false);
 
 var restartBtn = document.querySelector("#restart");
 restartBtn.addEventListener("click", function(){
-	//document.getElementById(`naglowek`).innerHTML = "End Game";
 	Game.isEnd = false;
 	document.getElementById(`headline`).innerHTML = "The Painter Game";
 	Player.score = 0;
 	Player.position.x=10;
 	Player.position.y=20;
 	Player.direction = "up";
-	if(picture==true){
+	if(Map.picture==true){
 		document.getElementById("pause").src="img/pause.png";
-		picture=false;
+		Map.picture=false;
 	}
-	createTraps();
-	move();
-}, false);
+	Map.createTraps();
+	Player.move();
+}, false);*/
