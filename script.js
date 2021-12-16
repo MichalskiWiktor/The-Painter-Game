@@ -1,3 +1,7 @@
+/**
+ * 1. Fix out of boundires problem
+ * 2. Fix gray fields problem
+ */
 let Map = {
 	size:{
 		x: 20,
@@ -8,13 +12,10 @@ let Map = {
 	trapsX: [],
 	trapsY: [],
 	numberOfTraps: 10,
-	picture: false,
 	generateMap(){
 		let board="";
-		for(let i=0;i<Map.size.y;i++)
-		{
-			for(let j=0;j<Map.size.x;j++)
-			{
+		for(let i=0;i<Map.size.y;i++){
+			for(let j=0;j<Map.size.x;j++){
 				board = board +`<div id="squer${i}.${j}" class="square"></div>`;
 			}
 			board = board + '<div style="clear:both"></div>';
@@ -36,21 +37,29 @@ let Map = {
 	  }
   	},
 	isOutOfBoundries(axis, symbol){
-		if(axis=="x" && symbol=="+" && (Player.position.x + 1) >=20){
-			Player.position.x=-1;
-			return false;
+		if(axis=="x" && symbol=="+"){
+			if((Player.position.x + 1) >=20){
+				Player.position.x = -1;
+				return false;
+			}
 		}
-		else if(axis=="x" && symbol=="-" && (Player.position.x - 1) <0){
-			Player.position.x=20;
-			return false;
+		else if(axis=="x" && symbol=="-"){
+			if((Player.position.x - 1) <0){
+				Player.position.x = 20;
+				return false;
+			}
 		}
-		else if(axis=="y" && symbol=="+" && (Player.position.y + 1) >=40){
-			Player.position.y=-1;
-			return false;
+		else if(axis=="y" && symbol=="+"){
+			if((Player.position.y + 1) >=40){
+				Player.position.y = -1;
+				return false;
+			}
 		}
-		else if(axis=="y" && symbol=="-" && (Player.position.y - 1) <0){
-			Player.position.y=40;
-			return false;
+		else if(axis=="y" && symbol=="-" ){
+			if((Player.position.y - 1) <0){
+				Player.position.y = 40;
+				return false;
+			}
 		}
 		return true;
 	},
@@ -90,6 +99,7 @@ let Player = {
 				Game.endGame();
 			}
 		}
+		/*If player eneters in his own fields*/
 		/*if(document.getElementById(`squer${this.position.y}.${this.position.x}`).style.background=="gray" && Game.isRestart==false){
 			Game.damageSound.play();
 			Game.endGame();
@@ -127,36 +137,36 @@ let Player = {
 	},
 }
 let Game = {
+	status:true, /////////true - game is on   false - game is poused
 	isRestart: false,
 	isEnd: false,
 	damageSound: new Audio("sounds/no.wav"),
-	gameStatus: true,////////Play or Pouse
 	endGame(){
 		this.isEnd = true;
 		document.getElementById(`naglowek`).innerHTML = "End Game";
 	}
 }
 /*Event Listeners*/
-var start = document.querySelector("#start");
+let start = document.querySelector("#start");
 start.addEventListener("click", function() {
 	Player.move();
 }, false);
 
-/*var gameStatus = document.querySelector("#pause");
+let gameStatus = document.querySelector("#pause");
 gameStatus.addEventListener("click", function () {
-	if(Map.picture==false){
-		Game.setEnd(true);
+	if(Game.status){/////if game is on and click then:
+		Game.isEnd = true;
 		document.getElementById("pause").src="img/play.png";
-		Map.picture=true;
+		Game.status = false;
 	}
-	else {
-		Game.setEnd(false);
+	else {/////if game is off and click then:
+		Game.isEnd = false;
 		document.getElementById("pause").src="img/pause.png";
-		Map.picture=false;
+		Game.status = true;
 		Player.move();
 	}
 }, false);
-
+/*
 var restartBtn = document.querySelector("#restart");
 restartBtn.addEventListener("click", function(){
 	Game.isEnd = false;
