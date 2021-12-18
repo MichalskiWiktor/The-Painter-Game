@@ -1,6 +1,8 @@
 /**
  * 1. Fix out of boundires problem
  * 2. Fix gray fields problem
+ * 3. Up click jezeli direction == up to blad
+ * 4. Fix restart
  */
 let Map = {
 	size:{
@@ -38,26 +40,26 @@ let Map = {
   	},
 	isOutOfBoundries(axis, symbol){
 		if(axis=="x" && symbol=="+"){
-			if((Player.position.x + 1) >=20){
-				Player.position.x = -1;
+			if((Player.position.x + 1) >=20){////dziala
+				Player.position.x = 0;
 				return false;
 			}
 		}
 		else if(axis=="x" && symbol=="-"){
 			if((Player.position.x - 1) <0){
-				Player.position.x = 20;
+				Player.position.x = 19;
 				return false;
 			}
 		}
 		else if(axis=="y" && symbol=="+"){
-			if((Player.position.y + 1) >=40){
-				Player.position.y = -1;
+			if((Player.position.y + 1) >=40){///dziala
+				Player.position.y = 0;
 				return false;
 			}
 		}
 		else if(axis=="y" && symbol=="-" ){
 			if((Player.position.y - 1) <0){
-				Player.position.y = 40;
+				Player.position.y = 39;
 				return false;
 			}
 		}
@@ -71,10 +73,7 @@ let Player = {
 		y: 20
 	},
 	direction: "up",
-	isFirstMove: false,
 	move() {
-		if(this.isFirstMove==false)Map.generateTraps();
-		this.isFirstMove=true;
 		document.addEventListener("keypress", this.onKeyPress);
 		Map.paintedFieldsX[this.score] = this.position.x;
 		Map.paintedFieldsY[this.score] = this.position.y;
@@ -93,12 +92,11 @@ let Player = {
 				if(Map.isOutOfBoundries("x", "-"))this.position.x--;
 				break;
 		}
-		for(let i=0;i<Map.numberOfTraps;i++){
-			if(Map.trapsX[i]==this.position.x && Map.trapsY[i]==this.position.y){
-				Game.damageSound.play();
-				Game.endGame();
-			}
-		}
+		/*/*checks if player entered a trap
+		if(Map.trapsX.includes(this.position.x) && Map.trapsY.includes(this.position.y)){
+			Game.damageSound.play();
+			Game.endGame();
+		}*/
 		/*If player eneters in his own fields*/
 		/*if(document.getElementById(`squer${this.position.y}.${this.position.x}`).style.background=="gray" && Game.isRestart==false){
 			Game.damageSound.play();
@@ -149,6 +147,7 @@ let Game = {
 /*Event Listeners*/
 let start = document.querySelector("#start");
 start.addEventListener("click", function() {
+	Map.generateTraps();
 	Player.move();
 }, false);
 
@@ -166,8 +165,8 @@ gameStatus.addEventListener("click", function () {
 		Player.move();
 	}
 }, false);
-/*
-var restartBtn = document.querySelector("#restart");
+
+/*var restartBtn = document.querySelector("#restart");
 restartBtn.addEventListener("click", function(){
 	Game.isEnd = false;
 	document.getElementById(`headline`).innerHTML = "The Painter Game";
@@ -175,10 +174,7 @@ restartBtn.addEventListener("click", function(){
 	Player.position.x=10;
 	Player.position.y=20;
 	Player.direction = "up";
-	if(Map.picture==true){
-		document.getElementById("pause").src="img/pause.png";
-		Map.picture=false;
-	}
+	document.getElementById("pause").src="img/pause.png";
 	Map.createTraps();
 	Player.move();
 }, false);*/
